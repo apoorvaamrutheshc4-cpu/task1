@@ -14,7 +14,7 @@ RUN useradd -m spring
 
 WORKDIR /app
 
-COPY --from=builder /app/target/ott-platform.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 RUN chown -R spring:spring /app
 
