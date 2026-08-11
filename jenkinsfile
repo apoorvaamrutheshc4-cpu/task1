@@ -45,9 +45,9 @@ pipeline {
     stage('docker compose') {
             steps {
                sh '''
-               docker-compose down --remove-orphans || true
+               docker compose down --remove-orphans || true
 
-               docker-compose up -d --force-recreate
+               docker compose up -d --force-recreate
                '''
 
             }
