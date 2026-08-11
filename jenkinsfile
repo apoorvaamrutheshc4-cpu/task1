@@ -1,0 +1,49 @@
+pipeline {
+
+    agent any
+
+    environment {
+        // your variables here
+    }
+
+    stages {
+
+        stage('SCM Pull') {
+            steps {
+                // checkout GitHub repository
+            }
+        }
+
+        stage('Install Dependencies and Run Tests') {
+            steps {
+                // npm install
+                // npm test
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // docker build
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // docker compose up
+            }
+        }
+
+        stage('Curl') {
+            steps {
+                // readiness check
+                // curl endpoints
+            }
+        }
+    }
+
+    post {
+        // success
+        // failure
+        // cleanup
+    }
+}
