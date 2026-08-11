@@ -2,48 +2,74 @@ pipeline {
 
     agent any
 
+    tools {
+        maven 'Maven3'
+        jdk 'JDK17'
+    }
+
     environment {
-        // your variables here
+        IMAGE_NAME = "appu76/task2"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
         stage('SCM Pull') {
             steps {
-                // checkout GitHub repository
+                git branch: 'main',
+                    url: 'https://github.com/apoorvaamrutheshc4-cpu/task1.git'
             }
         }
 
-        stage('Install Dependencies and Run Tests') {
+    stage('Compile') {
             steps {
-                // npm install
-                // npm test
+                sh 'mvn clean compile'
             }
         }
 
-        stage('Build') {
+    stage('Package') {
             steps {
-                // docker build
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Deploy') {
+    stage('Build Docker Image') {
             steps {
-                // docker compose up
+
+                sh """
+                docker build \
+                -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                docker tag ${IMAGE_NAME}:${IMAGE_TAG}  ${IMAGE_NAME}:latest
+
+                """
             }
         }
 
-        stage('Curl') {
+    stage('docker compose') {
             steps {
-                // readiness check
-                // curl endpoints
+               sh '''
+               docker-compose down --remove-orphans || true
+
+               docker-compose up -d --force-recreate
+               '''
+
+            }
+
+       }
+
+   stage('Docker Cleanup') {
+
+            steps {
+
+                sh '''
+
+                docker image prune -f
+
+                docker system df
+
+                '''
             }
         }
-    }
 
-    post {
-        // success
-        // failure
-        // cleanup
-    }
-}
+       
+   }        
