@@ -1,34 +1,25 @@
-# Stage 1: Build
-FROM node:22 AS builder
+FROM maven:3.9.8-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy dependency files first for Docker layer caching
-COPY package*.json ./
+COPY pom.xml .
 
-# Install dependencies
-RUN npm install
+COPY src ./src
 
-# Copy application source
-COPY . .
+RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime
-FROM node:22-alpine
+FROM eclipse-temurin:17-jre
+
+RUN useradd -m spring
 
 WORKDIR /app
 
-# Copy application from builder
-COPY --from=builder /app .
+COPY --from=builder /app/target/ott-platform.jar app.jar
 
-# Create a non-root group and user
-RUN addgroup -S appgroup && \
-    adduser -S appuser -G appgroup
+RUN chown -R spring:spring /app
 
-# Run application as non-root user
-USER appuser
+USER spring
 
-# Application port
-EXPOSE 3000
+EXPOSE 8082
 
-# Start application
-CMD ["npm", "start"]
+ENTRYPOINT ["java","-jar","app.jar"]
